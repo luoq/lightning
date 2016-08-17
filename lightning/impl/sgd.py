@@ -190,8 +190,7 @@ class SGDClassifier(BaseClassifier, _BaseSGD):
         """
         rs = check_random_state(self.random_state)
 
-        reencode = self.multiclass
-        y, n_classes, n_vectors = self._set_label_transformers(y, reencode)
+        y, n_classes, n_vectors = self._set_label_transformers(y)
 
         ds = get_dataset(X)
         n_samples = ds.get_n_samples()

@@ -72,17 +72,14 @@ class BaseClassifier(BaseEstimator, ClassifierMixin):
 
         return out
 
-    def _set_label_transformers(self, y, reencode=False, neg_label=-1):
-        if reencode:
-            self.label_encoder_ = LabelEncoder()
-            y = self.label_encoder_.fit_transform(y).astype(np.int32)
-        else:
-            y = y.astype(np.int32)
+    def _set_label_transformers(self, y, neg_label=-1):
+        self.label_encoder_ = LabelEncoder()
+        y = self.label_encoder_.fit_transform(y).astype(np.int32)
+        self.classes_ = self.label_encoder_.classes_
 
         self.label_binarizer_ = LabelBinarizer(neg_label=neg_label,
                                                pos_label=1)
         self.label_binarizer_.fit(y)
-        self.classes_ = self.label_binarizer_.classes_.astype(np.int32)
         n_classes = len(self.label_binarizer_.classes_)
         n_vectors = 1 if n_classes <= 2 else n_classes
 
