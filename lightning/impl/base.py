@@ -2,13 +2,11 @@
 # License: BSD
 
 import numpy as np
-import scipy.sparse as sp
-
 from sklearn.base import BaseEstimator as _BaseEstimator
 from sklearn.base import ClassifierMixin, RegressorMixin
-from sklearn.utils.extmath import safe_sparse_dot
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import LabelEncoder
+from sklearn.utils.extmath import safe_sparse_dot, softmax
 
 from .randomkit import RandomState
 
@@ -39,9 +37,21 @@ class BaseEstimator(_BaseEstimator):
 class BaseClassifier(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
-        if len(self.classes_) != 2:
-            raise NotImplementedError("predict_(log_)proba only supported"
-                                      " for binary classification")
+        if len(self.classes_) > 2:
+            if self.loss == 'log':
+                if self.multiclass:#multinomial logistic regression
+                    return softmax(self.decision_function(X), copy=False)
+                else: # one-vs-rest logistic regression
+                    prob = self.decision_function(X)
+                    prob *= -1
+                    np.exp(prob, prob)
+                    prob += 1
+                    np.reciprocal(prob, prob)
+                    # OvR normalization, like LibLinear's predict_probability
+                    prob /= prob.sum(axis=1).reshape((prob.shape[0], -1))
+                    return prob
+            else:
+                raise NotImplementedError("predict_(log_)proba not implemented")
 
         if self.loss == "log":
             df = self.decision_function(X).ravel()
