@@ -151,8 +151,8 @@ class SGDClassifier(BaseClassifier, _BaseSGD):
         self.verbose = verbose
         self.coef_ = None
 
-    def _get_loss(self):
-        if self.multiclass:
+    def _get_loss(self, n_vectors):
+        if n_vectors>1 and self.multiclass:
             losses = {
                 "log": MulticlassLog(),
                 "hinge": MulticlassHinge(),
@@ -199,7 +199,7 @@ class SGDClassifier(BaseClassifier, _BaseSGD):
 
         self.intercept_ = np.zeros(n_vectors, dtype=np.float64)
 
-        loss = self._get_loss()
+        loss = self._get_loss(n_vectors)
         penalty = self._get_penalty()
 
         if n_vectors == 1 or not self.multiclass:
