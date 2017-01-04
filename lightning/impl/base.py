@@ -86,7 +86,12 @@ class BaseClassifier(BaseEstimator, ClassifierMixin):
         return y, n_classes, n_vectors
 
     def decision_function(self, X):
-        pred = safe_sparse_dot(X, self.coef_.T)
+        if self.coef_.shape[0] > 2 or self.coef_.shape[0] == 1:
+            pred = safe_sparse_dot(X, self.coef_.T)
+        elif self.coef_.shape[0] == 2:
+            pred = safe_sparse_dot(X, self.coef_[1:2].T)
+        else:
+            raise RuntimeError('nrow of coef_ must >= 2')
         if hasattr(self, "intercept_"):
             pred += self.intercept_
         return pred
